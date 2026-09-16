@@ -1,4 +1,4 @@
-# Microservices & Distributed Systems Interview Cheatsheet
+# Microservices & Distributed Systems
 
 Use this guide to discuss key architectural tradeoffs and design decisions implemented in this repository during technical interviews.
 
