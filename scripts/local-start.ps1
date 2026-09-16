@@ -7,9 +7,9 @@ Write-Host "========================================================" -Foregroun
 # 1. Check if Docker daemon is running
 try {
     docker info 2>&1 | Out-Null
-    Write-Host "✓ Docker daemon is active." -ForegroundColor Green
+    Write-Host "[PASS] Docker daemon is active." -ForegroundColor Green
 } catch {
-    Write-Host "✗ Docker is not running. Please start Docker Desktop and re-run." -ForegroundColor Red
+    Write-Host "[FAIL] Docker is not running. Please start Docker Desktop and re-run." -ForegroundColor Red
     exit 1
 }
 

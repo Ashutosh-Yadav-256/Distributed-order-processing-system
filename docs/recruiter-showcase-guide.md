@@ -42,7 +42,7 @@ In traditional monolithic or naive microservice architectures, e-commerce platfo
                          │ Web / Mobile / AI Agents │
                          └────────────┬─────────────┘
                                       │ HTTPS
-                                      ▼
+                                      |
                          ┌──────────────────────────┐
                          │      API GATEWAY         │
                          │ Spring Cloud Gateway     │
@@ -54,7 +54,7 @@ In traditional monolithic or naive microservice architectures, e-commerce platfo
                                       │
          ┌────────────────────────────┼────────────────────────────┐
          │                            │                            │
-         ▼                            ▼                            ▼
+         |                            |                            |
 ┌────────────────┐           ┌────────────────┐           ┌────────────────┐
 │ Order Service  │           │ Inventory Svc  │           │  Payment Svc   │
 │  (Port 8081)   │           │  (Port 8082)   │           │  (Port 8083)   │
@@ -63,7 +63,7 @@ In traditional monolithic or naive microservice architectures, e-commerce platfo
         │                            │                            │
         └────────────────────────────┼────────────────────────────┘
                                      │
-                                     ▼
+                                     |
                           ┌──────────────────────┐
                           │   RabbitMQ Bus       │
                           │ Topic Exchange       │
@@ -71,7 +71,7 @@ In traditional monolithic or naive microservice architectures, e-commerce platfo
                           └──────────┬───────────┘
                                      │
                       ┌──────────────┼──────────────┐
-                      ▼                             ▼
+                      |                             |
              ┌────────────────┐            ┌────────────────┐
              │ Notification   │            │ Floci AWS S3   │
              │ Service (:8084)│            │ Emulator (:4566│

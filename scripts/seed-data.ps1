@@ -17,7 +17,7 @@ $tokenBody = @{
 try {
     $tokenResponse = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/auth/token" -Method Post -Body $tokenBody -ContentType "application/json"
     $token = $tokenResponse.data.token
-    Write-Host "✓ Received JWT Bearer Token!" -ForegroundColor Green
+    Write-Host "[PASS] Received JWT Bearer Token!" -ForegroundColor Green
 } catch {
     Write-Host "Failed to obtain token from Gateway. Is Gateway running at $GatewayUrl?" -ForegroundColor Red
     exit 1
@@ -69,10 +69,10 @@ foreach ($prod in $products) {
     $body = $prod | ConvertTo-Json
     try {
         $res = Invoke-RestMethod -Uri "$GatewayUrl/api/v1/inventory" -Method Post -Headers $headers -Body $body
-        Write-Host "✓ Added product: $($prod.name) ($($prod.sku)) - Qty: $($prod.availableQuantity)" -ForegroundColor Green
+        Write-Host "[PASS] Added product: $($prod.name) ($($prod.sku)) - Qty: $($prod.availableQuantity)" -ForegroundColor Green
     } catch {
-        Write-Host "✗ Failed to add $($prod.name): $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[FAIL] Failed to add $($prod.name): $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
-Write-Host "`n✓ Inventory seeding completed successfully!" -ForegroundColor Cyan
+Write-Host "`n[PASS] Inventory seeding completed successfully!" -ForegroundColor Cyan

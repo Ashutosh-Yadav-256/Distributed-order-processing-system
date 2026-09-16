@@ -15,9 +15,9 @@ Write-Host "================================================================" -F
 # 1. Health check
 try {
     $health = Invoke-RestMethod -Uri "$InventoryUrl/actuator/health" -Method Get -TimeoutSec 3 -ErrorAction Stop
-    Write-Host "✓ Inventory service is healthy ($($health.status))." -ForegroundColor Green
+    Write-Host "[PASS] Inventory service is healthy ($($health.status))." -ForegroundColor Green
 } catch {
-    Write-Host "✗ Failed to reach Inventory Service at $InventoryUrl." -ForegroundColor Red
+    Write-Host "[FAIL] Failed to reach Inventory Service at $InventoryUrl." -ForegroundColor Red
     Write-Host "  Make sure Inventory Service is running on port 8082 (e.g., via Docker Compose)." -ForegroundColor Yellow
     exit 1
 }
@@ -116,7 +116,7 @@ Write-Host ("{0,-18} | {1,-18} | {2,-18} | {3,-12}" -f "P95 Latency", "$($coldSt
 Write-Host ("{0,-18} | {1,-18} | {2,-18} | {3,-12}" -f "P99 Latency", "$($coldStats.P99) ms", "$($warmStats.P99) ms", "$($speedupP99)x")
 Write-Host "================================================================`n" -ForegroundColor Green
 
-Write-Host "📌 Resume-Ready Bullet Point:" -ForegroundColor Cyan
+Write-Host "[INFO] Resume-Ready Bullet Point:" -ForegroundColor Cyan
 Write-Host "----------------------------------------------------------------"
 Write-Host "Architected Redis read-through caching layer for high-throughput inventory queries," -ForegroundColor White
 Write-Host "reducing P99 response latency from $($coldStats.P99)ms to $($warmStats.P99)ms ($([Math]::Round((1 - ($warmStats.P99 / $coldStats.P99)) * 100))% reduction) and" -ForegroundColor White

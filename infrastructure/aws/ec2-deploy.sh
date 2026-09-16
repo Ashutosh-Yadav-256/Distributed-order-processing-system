@@ -10,7 +10,7 @@ echo "================================================================"
 
 # Check Docker
 if ! docker info > /dev/null 2>&1; then
-    echo "✗ Docker is not running or current user lacks permissions."
+    echo "[FAIL] Docker is not running or current user lacks permissions."
     echo "  Try: sudo systemctl start docker && sudo usermod -aG docker \$USER"
     exit 1
 fi

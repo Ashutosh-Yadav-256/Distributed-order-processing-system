@@ -259,7 +259,6 @@ Because RabbitMQ operates under **at-least-once delivery semantics**, network pa
 A dedicated benchmarking script is included in [`scripts/benchmark-redis.ps1`](scripts/benchmark-redis.ps1) and [`scripts/benchmark-redis.sh`](scripts/benchmark-redis.sh). It executes 100 consecutive requests cold (forced PostgreSQL DB fetch) vs 100 warm requests (Redis cache HIT):
 
 ```powershell
-# Run the benchmark yourself anytime:
 .\scripts\benchmark-redis.ps1 -Iterations 100
 ```
 
@@ -299,13 +298,8 @@ All integration tests utilize Spring MockMvc and in-memory H2 in strict PostgreS
 * **GitHub Actions CI**: Automated workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) triggers on every push and PR to `main`, validating the entire 7-module reactor on Ubuntu with Temurin JDK 17.
 
 ```bash
-# Run all unit and integration tests across the 7 modules:
 ./mvnw clean test
-
-# Run full verification including JaCoCo coverage reports:
 ./mvnw clean verify
-
-# Run SpotBugs and Checkstyle static quality checks:
 ./mvnw spotbugs:check checkstyle:check
 ```
 
@@ -324,7 +318,6 @@ Distributed systems must be designed to survive downstream failure. The platform
 | **5. Idempotent Deduplication** | Rapid repeated replay of same event/order | `processed_events` table enforces unique `(event_id, consumer_name)` | Zero duplicate charges or duplicate stock deductions |
 
 ```powershell
-# Run the Chaos / Failure Injection Suite:
 .\scripts\test-failure-injection.ps1 -GatewayUrl "http://localhost:8080"
 ```
 
@@ -370,10 +363,7 @@ A complete, battle-tested deployment setup is provided in [`infrastructure/aws/`
 
 ### One-Command Deployment:
 ```bash
-# 1. SSH into your EC2 instance:
 ssh -i your-key.pem ec2-user@<YOUR-EC2-PUBLIC-IP>
-
-# 2. Clone and launch with swap allocation:
 git clone https://github.com/Ashutosh-Yadav-256/Distributed-order-processing-system.git
 cd Distributed-order-processing-system
 chmod +x infrastructure/aws/ec2-deploy.sh mvnw
@@ -411,12 +401,9 @@ Located in [`mcp-server/`](mcp-server/), the platform includes a native **Model 
 6. `get_system_health`: Scrapes health indicators across all 6 microservices.
 
 ```bash
-# Run standalone MCP server:
 python mcp-server/server.py
-
-# Or launch via helper scripts:
-.\run-mcp-server.bat   # Windows
-./run-mcp-server.sh    # Linux / macOS
+.\run-mcp-server.bat
+./run-mcp-server.sh
 ```
 
 ---
@@ -435,18 +422,17 @@ python mcp-server/server.py
 
 ### 2. Launch Complete Stack via Docker Compose
 ```bash
-# Starts Postgres, Redis, RabbitMQ, and all Spring Boot microservices:
 docker compose -f infrastructure/docker/docker-compose.yml up -d --build
 ```
 
 ### 3. Seed Catalog Data & Run Saga Scenarios
 ```powershell
-# Windows PowerShell:
 .\scripts\seed-data.ps1
 .\scripts\test-saga.ps1
 .\scripts\benchmark-redis.ps1
+```
 
-# Linux / macOS Bash:
+```bash
 ./scripts/seed-data.sh
 ./scripts/test-saga.sh
 ./scripts/benchmark-redis.sh
@@ -459,6 +445,8 @@ docker compose -f infrastructure/docker/docker-compose.yml up -d --build
 Complete OpenAPI 3.0 specification available in [`docs/openapi.yaml`](docs/openapi.yaml):
 
 ```text
+GET    /health                     API Gateway instant liveness check
+GET    /api/v1/health              Public API health check (status, timestamp)
 POST   /api/v1/orders              Create new order and initiate Saga
 GET    /api/v1/orders/{id}         Query order lifecycle status
 GET    /api/v1/inventory           List inventory catalog and Redis cache state

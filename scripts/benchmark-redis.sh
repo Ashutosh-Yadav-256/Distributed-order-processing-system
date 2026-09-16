@@ -14,11 +14,11 @@ echo "================================================================"
 
 # Check health
 if ! curl -sf "$INVENTORY_URL/actuator/health" > /dev/null; then
-    echo "✗ Failed to reach Inventory Service at $INVENTORY_URL."
+    echo "[FAIL] Failed to reach Inventory Service at $INVENTORY_URL."
     echo "  Please ensure the service is running."
     exit 1
 fi
-echo "✓ Inventory service is healthy."
+echo "[PASS] Inventory service is healthy."
 
 # Fetch or seed product
 PRODUCTS_JSON=$(curl -sf "$INVENTORY_URL/api/v1/inventory")

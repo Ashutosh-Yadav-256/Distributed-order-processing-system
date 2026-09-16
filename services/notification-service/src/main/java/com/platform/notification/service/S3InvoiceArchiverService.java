@@ -66,7 +66,7 @@ public class S3InvoiceArchiverService {
                     .build();
 
             s3Client.putObject(putRequest, RequestBody.fromString(invoiceJson));
-            log.info("✔ Successfully archived order invoice to s3://{}/{}", bucketName, invoiceKey);
+            log.info("[SUCCESS] Archived order invoice to s3://{}/{}", bucketName, invoiceKey);
             return true;
 
         } catch (Exception e) {

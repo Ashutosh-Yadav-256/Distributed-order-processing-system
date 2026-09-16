@@ -18,7 +18,7 @@ if [ -z "$TOKEN" ]; then
   echo "Failed to get token from $GATEWAY_URL"
   exit 1
 fi
-echo "✓ Received JWT Token!"
+echo "[PASS] Received JWT Token!"
 
 echo -e "\n2. Seeding products..."
 PRODUCTS=(
@@ -33,7 +33,7 @@ for p in "${PRODUCTS[@]}"; do
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: application/json" \
     -d "$p" > /dev/null
-  echo "✓ Seeded product: $p"
+  echo "[PASS] Seeded product: $p"
 done
 
-echo -e "\n✓ Finished seeding inventory!"
+echo -e "\n[PASS] Finished seeding inventory!"

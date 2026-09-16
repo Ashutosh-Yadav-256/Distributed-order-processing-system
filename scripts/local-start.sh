@@ -6,7 +6,7 @@ echo " Distributed Order Processing System - Local Bootstrapper"
 echo "========================================================"
 
 if ! docker info > /dev/null 2>&1; then
-    echo "✗ Docker is not running. Please start Docker and re-run."
+    echo "[FAIL] Docker is not running. Please start Docker and re-run."
     exit 1
 fi
 

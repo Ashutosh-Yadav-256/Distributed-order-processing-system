@@ -20,21 +20,21 @@ The platform utilizes a structured topic exchange architecture with dedicated re
 ```text
                Main Queue
                    │
-                   ▼
+                   |
                 Consumer
                 /      \
             SUCCESS    FAILURE
               │           │
-              ▼           ▼
+              |           |
              ACK     Retry Queue (x-message-ttl: 5000ms)
                           │
-                          ▼  (after TTL expiry)
+                          |  (after TTL expiry)
                      Main Queue
                           │
                (After max 3 retries)
-                          ▼
+                          |
                   ecommerce.dlq.exchange
                           │
-                          ▼
+                          |
                      Service DLQ
 ```

@@ -36,19 +36,19 @@ $orderReqA = @{
 } | ConvertTo-Json
 
 $orderA = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders" -Method Post -Headers $headers -Body $orderReqA).data
-Write-Host "✓ Order created with ID: $($orderA.id), Initial Status: $($orderA.status)" -ForegroundColor Green
+Write-Host "[PASS] Order created with ID: $($orderA.id), Initial Status: $($orderA.status)" -ForegroundColor Green
 
 Write-Host "Waiting 2s for RabbitMQ Saga choreography..."
 Start-Sleep -Seconds 2
 
 $checkedOrderA = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders/$($orderA.id)" -Method Get -Headers $headers).data
-Write-Host "✓ Final Order Status: $($checkedOrderA.status)" -ForegroundColor $(if ($checkedOrderA.status -eq "CONFIRMED") { "Green" } else { "Red" })
+Write-Host "[PASS] Final Order Status: $($checkedOrderA.status)" -ForegroundColor $(if ($checkedOrderA.status -eq "CONFIRMED") { "Green" } else { "Red" })
 
 $paymentA = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/payments/order/$($orderA.id)" -Method Get -Headers $headers).data
-Write-Host "✓ Payment Status: $($paymentA.status), Txn: $($paymentA.transactionId)" -ForegroundColor Green
+Write-Host "[PASS] Payment Status: $($paymentA.status), Txn: $($paymentA.transactionId)" -ForegroundColor Green
 
 $notificationsA = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/notifications/order/$($orderA.id)" -Method Get -Headers $headers).data
-Write-Host "✓ Dispatched Notifications count: $($notificationsA.Count)" -ForegroundColor Green
+Write-Host "[PASS] Dispatched Notifications count: $($notificationsA.Count)" -ForegroundColor Green
 
 # -------------------------------------------------------------
 # Scenario B: Out of Stock Failure
@@ -71,13 +71,13 @@ $orderReqB = @{
 } | ConvertTo-Json
 
 $orderB = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders" -Method Post -Headers $headers -Body $orderReqB).data
-Write-Host "✓ Order created with ID: $($orderB.id)" -ForegroundColor Green
+Write-Host "[PASS] Order created with ID: $($orderB.id)" -ForegroundColor Green
 
 Write-Host "Waiting 2s for RabbitMQ Saga to detect stock shortage..."
 Start-Sleep -Seconds 2
 
 $checkedOrderB = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders/$($orderB.id)" -Method Get -Headers $headers).data
-Write-Host "✓ Final Order Status: $($checkedOrderB.status) (Reason: $($checkedOrderB.failureReason))" -ForegroundColor $(if ($checkedOrderB.status -eq "FAILED") { "Green" } else { "Red" })
+Write-Host "[PASS] Final Order Status: $($checkedOrderB.status) (Reason: $($checkedOrderB.failureReason))" -ForegroundColor $(if ($checkedOrderB.status -eq "FAILED") { "Green" } else { "Red" })
 
 # -------------------------------------------------------------
 # Scenario C: Payment Failure & Compensating Transaction
@@ -104,21 +104,21 @@ $orderReqC = @{
 } | ConvertTo-Json
 
 $orderC = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders" -Method Post -Headers $headers -Body $orderReqC).data
-Write-Host "✓ Order created with ID: $($orderC.id)" -ForegroundColor Green
+Write-Host "[PASS] Order created with ID: $($orderC.id)" -ForegroundColor Green
 
 Write-Host "Waiting 3s for Saga: Reservation -> Payment Failure -> Stock Compensation Release..."
 Start-Sleep -Seconds 3
 
 $checkedOrderC = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders/$($orderC.id)" -Method Get -Headers $headers).data
-Write-Host "✓ Final Order Status: $($checkedOrderC.status) (Reason: $($checkedOrderC.failureReason))" -ForegroundColor $(if ($checkedOrderC.status -eq "CANCELLED") { "Green" } else { "Red" })
+Write-Host "[PASS] Final Order Status: $($checkedOrderC.status) (Reason: $($checkedOrderC.failureReason))" -ForegroundColor $(if ($checkedOrderC.status -eq "CANCELLED") { "Green" } else { "Red" })
 
 $stockAfter = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/inventory/44444444-4444-4444-4444-444444444444" -Method Get -Headers $headers).data.availableQuantity
 Write-Host "Stock after compensation release: $stockAfter" -ForegroundColor Cyan
 
 if ($stockBefore -eq $stockAfter) {
-    Write-Host "✓ SUCCESS: Stock was successfully returned via compensating transaction!" -ForegroundColor Green
+    Write-Host "[PASS] SUCCESS: Stock was successfully returned via compensating transaction!" -ForegroundColor Green
 } else {
-    Write-Host "✗ ERROR: Stock was not restored correctly!" -ForegroundColor Red
+    Write-Host "[FAIL] ERROR: Stock was not restored correctly!" -ForegroundColor Red
 }
 
 Write-Host "`n========================================================" -ForegroundColor Cyan

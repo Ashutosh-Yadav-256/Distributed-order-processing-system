@@ -4,14 +4,14 @@ An official **Model Context Protocol (MCP)** server providing AI assistants (**A
 
 ---
 
-## ⚡ Key Highlights
+## Key Highlights
 * **Standard JSON-RPC 2.0 (stdio)**: Compliant with the 2024-11-05 MCP specification.
 * **Zero External Dependencies**: Implemented using pure Python standard library (`sys`, `json`, `urllib`). No `pip install` required — runs immediately on any system with Python 3.10+.
 * **Dual Runtime Target**: Seamlessly talks to either the Spring Cloud Gateway (`http://localhost:8080`) or the QA Test Harness (`http://localhost:4000`).
 
 ---
 
-## 🧰 Available MCP Tools
+## Available MCP Tools
 
 | Tool Name | Parameters | Description |
 | :--- | :--- | :--- |
@@ -24,14 +24,14 @@ An official **Model Context Protocol (MCP)** server providing AI assistants (**A
 
 ---
 
-## 📦 Available MCP Resources
+## Available MCP Resources
 
 * **`order://catalog`**: Real-time snapshot of products in stock with available and reserved quantities.
 * **`order://system-health`**: Telemetry and health metrics across all services.
 
 ---
 
-## 🚀 How to Use & Configure
+## How to Use & Configure
 
 ### 1. In Antigravity (`.agents/mcp_config.json` or `~/.gemini/config/mcp_config.json`)
 ```json
@@ -70,7 +70,7 @@ An official **Model Context Protocol (MCP)** server providing AI assistants (**A
 
 ---
 
-## 🧪 Testing the MCP Server
+## Testing the MCP Server
 Run the built-in automated test suite:
 ```bash
 python mcp-server/test_mcp.py

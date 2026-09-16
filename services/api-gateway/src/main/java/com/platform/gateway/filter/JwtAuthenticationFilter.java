@@ -35,6 +35,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final List<String> OPEN_ENDPOINTS = List.of(
             "/api/v1/auth/",
             "/actuator/",
+            "/health",
+            "/api/v1/health",
+            "/healthz",
             "/swagger-ui",
             "/v3/api-docs"
     );
