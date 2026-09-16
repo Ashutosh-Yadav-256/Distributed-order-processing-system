@@ -1,0 +1,3 @@
+# Convenience root compose file pointing to infrastructure/docker setup
+include:
+  - infrastructure/docker/docker-compose.yml

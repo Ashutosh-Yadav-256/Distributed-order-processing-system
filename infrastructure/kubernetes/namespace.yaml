@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: order-platform
+  labels:
+    environment: production
+    app.kubernetes.io/part-of: distributed-order-platform
