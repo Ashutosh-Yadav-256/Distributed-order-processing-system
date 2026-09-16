@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: Distributed Order Processing System API
+  description: >
+    Production-grade event-driven microservices platform implementing the Saga Pattern,
+    Idempotency, RabbitMQ messaging, Redis caching, and Floci AWS Cloud Emulation.
+  version: 1.0.0
+  contact:
+    name: Platform Engineering Team
+    url: https://github.com/platform/distributed-order-processing-system
+
+servers:
+  - url: http://localhost:8080
+    description: Spring Cloud API Gateway (Production Gateway)
+  - url: http://localhost:4000
+    description: QA Test Server & Platform Emulator Bridge
+
+paths:
+  /api/v1/auth/token:
+    post:
+      summary: Generate JWT Authentication Token
+      description: Issues a signed JWT Bearer token with roles (ROLE_USER, ROLE_ADMIN) for authenticating API requests.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: customer@example.com
+                roles:
+                  type: array
+                  items:
+                    type: string
+                  example: ["ROLE_USER", "ROLE_ADMIN"]
+      responses:
+        '200':
+          description: Token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /api/v1/orders:
+    post:
+      summary: Create Order & Trigger Saga Orchestration
+      description: Initiates a distributed Saga transaction across Order, Inventory, Payment, S3, and Notification services.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Correlation-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created and Saga processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Invalid request payload
+        '401':
+          description: Unauthorized - missing or invalid JWT
+
+  /api/v1/orders/{orderId}:
+    get:
+      summary: Get Order Status & Details
+      description: Retrieves the current status (PENDING, INVENTORY_RESERVED, CONFIRMED, CANCELLED, FAILED) of an order.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Order found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Order not found
+
+  /api/v1/inventory:
+    get:
+      summary: List Product Inventory
+      description: Returns all catalog products with available stock, reserved stock, unit prices, and Redis cache states.
+      responses:
+        '200':
+          description: Inventory listing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductInventory'
+
+  /api/v1/inventory/{productId}:
+    get:
+      summary: Check Single Product Stock
+      description: Checks product availability with Redis read-through cache optimization.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Product stock details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  cacheSource:
+                    type: string
+                    example: REDIS
+                  data:
+                    $ref: '#/components/schemas/ProductInventory'
+        '404':
+          description: Product not found
+
+  /api/v1/payments/order/{orderId}:
+    get:
+      summary: Get Payment Record by Order
+      description: Retrieves transaction ID, amount, and payment status (SUCCESS, FAILED, REFUNDED) for an order.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Payment details
+        '404':
+          description: Payment record not found
+
+  /api/v1/notifications/order/{orderId}:
+    get:
+      summary: Get Notification Audit Logs
+      description: Retrieves all dispatched communications (EMAIL / SMS) for an order.
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification log list
+
+  /api/v1/aws/s3/invoices:
+    get:
+      summary: List Archived Invoices in Floci AWS S3
+      description: Lists all customer invoice JSON objects stored in the `ecommerce-order-invoices` bucket.
+      responses:
+        '200':
+          description: S3 invoice list
+
+  /actuator/health:
+    get:
+      summary: Microservices Ecosystem Health Telemetry
+      description: Returns health status and component telemetry for all 6 microservices and the Floci AWS emulator.
+      responses:
+        '200':
+          description: System health status
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+            tokenType:
+              type: string
+              example: Bearer
+            expiresIn:
+              type: integer
+              example: 86400
+
+    OrderItemRequest:
+      type: object
+      required:
+        - productId
+        - quantity
+        - unitPrice
+      properties:
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: number
+          format: double
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - customerId
+        - customerEmail
+        - items
+        - paymentMethod
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        customerEmail:
+          type: string
+          format: email
+        currency:
+          type: string
+          default: USD
+        paymentMethod:
+          type: string
+          enum: [CREDIT_CARD_VALID, CREDIT_CARD_FAIL, DEBIT_CARD, PAYPAL]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+        customerEmail:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, INVENTORY_RESERVED, CONFIRMED, CANCELLED, FAILED]
+        totalAmount:
+          type: number
+        currency:
+          type: string
+        failureReason:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    ProductInventory:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        name:
+          type: string
+        availableQuantity:
+          type: integer
+        reservedQuantity:
+          type: integer
+        unitPrice:
+          type: number
