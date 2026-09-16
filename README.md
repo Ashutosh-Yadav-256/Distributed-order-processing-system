@@ -19,13 +19,13 @@ A production-grade, event-driven distributed microservices platform engineered f
 
 ## Developer Profile & Live Showcase
 
-Developed and engineered by **Ashutosh Yadav** — Senior Backend & Distributed Systems Engineer.
+Developed and engineered by **Ashutosh Yadav** 
 
 * **Portfolio Website**: [ashutoshwork.space](https://ashutoshwork.space)
 * **LinkedIn**: [linkedin.com/in/ashutoshyadav256](https://www.linkedin.com/in/ashutoshyadav256)
 * **Email**: [ashutosh4tech@gmail.com](mailto:ashutosh4tech@gmail.com)
 * **GitHub**: [github.com/ashutoshyadav256](https://github.com/ashutoshyadav256)
-* **Availability**: Open to Senior Software Engineer (Backend / Distributed Systems / Cloud Architecture) roles, Principal Engineering opportunities, and enterprise microservices consulting.
+
 
 > [!TIP]
 > **Clickable Live Cloud Deployment**:
@@ -266,9 +266,7 @@ A dedicated benchmarking script is included in [`scripts/benchmark-redis.ps1`](s
 | **Average Latency** | `24.2 ms` | `1.6 ms` | **15.1x faster** |
 | **P50 Latency (Median)** | `22.8 ms` | `1.4 ms` | **16.2x faster** |
 | **P95 Latency** | `36.5 ms` | `2.7 ms` | **13.5x faster** |
-| **P99 Latency** | `49.1 ms` | `3.6 ms` | **13.6x faster (93% cut)** |
-
-> 📌 **Resume-Ready Bullet**:
+| **P99 Latency** | `49.1 ms` | `3.6 ms` | **13.6x faster (93% cut)**
 > *"Architected a Redis read-through caching tier for high-throughput inventory lookups, cutting P99 response latency from 49.1ms to 3.6ms (93% reduction) and offloading over 90% of read traffic from PostgreSQL under high concurrency."*
 
 ---
