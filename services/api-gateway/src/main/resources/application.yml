@@ -1,0 +1,73 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: http://${ORDER_SERVICE_HOST:localhost}:${ORDER_SERVICE_PORT:8081}
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                key-resolver: "#{@userKeyResolver}"
+
+        - id: inventory-service
+          uri: http://${INVENTORY_SERVICE_HOST:localhost}:${INVENTORY_SERVICE_PORT:8082}
+          predicates:
+            - Path=/api/v1/inventory/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@userKeyResolver}"
+
+        - id: payment-service
+          uri: http://${PAYMENT_SERVICE_HOST:localhost}:${PAYMENT_SERVICE_PORT:8083}
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                key-resolver: "#{@userKeyResolver}"
+
+        - id: notification-service
+          uri: http://${NOTIFICATION_SERVICE_HOST:localhost}:${NOTIFICATION_SERVICE_PORT:8084}
+          predicates:
+            - Path=/api/v1/notifications/**
+
+jwt:
+  secret: ${JWT_SECRET:defaultSecretKeyForDistributedOrderPlatformMustBeAtLeast32BytesLong}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.platform.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
