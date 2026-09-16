@@ -2,7 +2,6 @@ package com.platform.order.dto;
 
 import com.platform.common.enums.OrderStatus;
 import com.platform.order.entity.Order;
-import com.platform.order.entity.OrderItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
