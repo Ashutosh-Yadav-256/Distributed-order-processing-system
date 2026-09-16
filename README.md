@@ -2,15 +2,17 @@
 
 [ English ] · [ [Español](docs/i18n/README_es.md) ] · [ [简体中文](docs/i18n/README_zh.md) ] · [ [Deutsch](docs/i18n/README_de.md) ] · [ [日本語](docs/i18n/README_ja.md) ]
 
+[![Build & Quality Gates](https://github.com/Ashutosh-Yadav-256/Distributed-order-processing-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Ashutosh-Yadav-256/Distributed-order-processing-system/actions/workflows/ci.yml)
 [![Java 17](https://img.shields.io/badge/Java-17%20LTS-orange.svg?style=flat-square&logo=openjdk)](https://www.oracle.com/java/)
 [![Spring Boot 3.3.3](https://img.shields.io/badge/Spring%20Boot-3.3.3-brightgreen.svg?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
-[![Spring Cloud 2023.0.3](https://img.shields.io/badge/Spring%20Cloud-2023.0.3-blue.svg?style=flat-square)](https://spring.io/projects/spring-cloud)
 [![RabbitMQ 3.13](https://img.shields.io/badge/RabbitMQ-3.13-orange.svg?style=flat-square&logo=rabbitmq)](https://www.rabbitmq.com/)
 [![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-blue.svg?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![Redis 7](https://img.shields.io/badge/Redis-7.2-red.svg?style=flat-square&logo=redis)](https://redis.io/)
-[![Docker Compose](https://img.shields.io/badge/Orchestration-Docker%20Compose-2496ED.svg?style=flat-square&logo=docker)](https://www.docker.com/)
+[![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo-Enforced-blue.svg?style=flat-square&logo=java)]()
+[![SpotBugs Quality](https://img.shields.io/badge/SpotBugs-Audited-brightgreen.svg?style=flat-square)]()
+[![Checkstyle](https://img.shields.io/badge/Checkstyle-Compliant-brightgreen.svg?style=flat-square)]()
+[![ADRs](https://img.shields.io/badge/ADRs-6%20Documented-blueviolet.svg?style=flat-square)](docs/adr/README.md)
 [![AWS EC2](https://img.shields.io/badge/AWS-Free%20Tier%20EC2-FF9900.svg?style=flat-square&logo=amazonaws)](docs/aws-free-tier-deployment.md)
-[![Test Coverage](https://img.shields.io/badge/Saga%20Assertions-100%25%20Pass-success.svg?style=flat-square)]()
 [![License](https://img.shields.io/badge/License-MIT-gray.svg?style=flat-square)](LICENSE)
 
 A production-grade, event-driven distributed microservices platform engineered for high-throughput, high-concurrency order workflows. The system demonstrates enterprise distributed systems design patterns: **Choreography-based Saga transactions**, **PostgreSQL database-per-service logical isolation**, **atomic concurrency controls preventing inventory overselling**, **automatic compensating rollbacks**, **idempotent message deduplication**, **RabbitMQ dead letter retry pipelines**, **Redis read-through hot caching (15x speedup)**, **Resilience4j fault isolation**, **Spring Cloud Gateway with token-bucket rate limiting**, **native Model Context Protocol (MCP) AI integration**, and **automated AWS Free-Tier EC2 deployment**.
@@ -47,13 +49,15 @@ Developed and engineered by **Ashutosh Yadav**
 6. [Data Consistency, Concurrency & Caching Strategy](#data-consistency-concurrency--caching-strategy)
 7. [Idempotency & Message Deduplication Pipeline](#idempotency--message-deduplication-pipeline)
 8. [Reproducible Redis Caching Benchmark (P50, P95, P99)](#reproducible-redis-caching-benchmark-p50-p95-p99)
-9. [Automated Test Suites (Unit + Spring Boot Integration)](#automated-test-suites-unit--spring-boot-integration)
-10. [Authentic 12-Stage Git Commit Progression](#authentic-12-stage-git-commit-progression)
-11. [AWS Free-Tier EC2 Deployment Automation](#aws-free-tier-ec2-deployment-automation)
-12. [Floci Local AWS Cloud Integration](#floci-local-aws-cloud-integration)
-13. [Model Context Protocol (MCP) Server for AI Agents](#model-context-protocol-mcp-server-for-ai-agents)
-14. [Zero-Prerequisite Quickstart Guide](#zero-prerequisite-quickstart-guide)
-15. [REST API Specification & Endpoints](#rest-api-specification--endpoints)
+9. [Automated Test Suites & Quality Gates (JaCoCo, SpotBugs, Checkstyle)](#automated-test-suites--quality-gates-jacoco-spotbugs-checkstyle)
+10. [Failure Injection & Chaos Engineering Suite](#failure-injection--chaos-engineering-suite)
+11. [Architecture Decision Records (ADRs)](#architecture-decision-records-adrs)
+12. [Authentic 12-Stage Git Commit Progression](#authentic-12-stage-git-commit-progression)
+13. [AWS Free-Tier EC2 Deployment Automation](#aws-free-tier-ec2-deployment-automation)
+14. [Floci Local AWS Cloud Integration](#floci-local-aws-cloud-integration)
+15. [Model Context Protocol (MCP) Server for AI Agents](#model-context-protocol-mcp-server-for-ai-agents)
+16. [Zero-Prerequisite Quickstart Guide](#zero-prerequisite-quickstart-guide)
+17. [REST API Specification & Endpoints](#rest-api-specification--endpoints)
 
 ---
 
@@ -271,26 +275,71 @@ A dedicated benchmarking script is included in [`scripts/benchmark-redis.ps1`](s
 
 ---
 
-## Automated Test Suites (Unit + Spring Boot Integration)
+## Automated Test Suites & Quality Gates (JaCoCo, SpotBugs, Checkstyle)
 
-The platform includes comprehensive test suites across both unit and integration layers:
+The platform enforces a rigorous engineering quality bar with automated test execution, code coverage enforcement, and static analysis gates configured in the root Maven reactor and executed on every GitHub commit via GitHub Actions CI:
 
 ### 1. Service Unit Tests (JUnit 5 + Mockito)
-* [`OrderServiceTest.java`](services/order-service/src/test/java/com/platform/order/service/OrderServiceTest.java): Tests order creation, status transitions, and compensating event publication in complete isolation.
-* [`InventoryServiceTest.java`](services/inventory-service/src/test/java/com/platform/inventory/service/InventoryServiceTest.java): Tests atomic stock reservation, partial rollback logic, and compensating release.
+* [`OrderServiceTest.java`](services/order-service/src/test/java/com/platform/order/service/OrderServiceTest.java): Tests order creation, status transitions, and compensating event publication in complete isolation using `@ExtendWith(MockitoExtension.class)`.
+* [`InventoryServiceTest.java`](services/inventory-service/src/test/java/com/platform/inventory/service/InventoryServiceTest.java): Tests atomic stock reservation, partial rollback logic, and compensating release on cancellation.
 * [`PaymentServiceTest.java`](services/payment-service/src/test/java/com/platform/payment/service/PaymentServiceTest.java): Tests payment capture, card decline simulations, and refund loops.
+* [`PaymentProcessorSimulatorTest.java`](services/payment-service/src/test/java/com/platform/payment/simulator/PaymentProcessorSimulatorTest.java): Tests deterministic failure injection tokens (`CARD_FAIL_DECLINED`) and magic amount boundaries (`$999.99`).
 * [`NotificationServiceTest.java`](services/notification-service/src/test/java/com/platform/notification/service/NotificationServiceTest.java): Tests event-driven email dispatch and S3 invoice generation.
 
 ### 2. End-to-End Integration Tests (`@SpringBootTest`)
-* [`OrderControllerIntegrationTest.java`](services/order-service/src/test/java/com/platform/order/controller/OrderControllerIntegrationTest.java): Uses Spring MockMvc and in-memory H2 PostgreSQL mode (`application-test.yml`) to validate the complete HTTP request lifecycle:
-  1. `POST /api/v1/orders` saves an order to the database, verifies generated UUID and `PENDING` status.
-  2. `GET /api/v1/orders/{id}` retrieves and asserts exact JSON response matching database records.
-  3. `GET /api/v1/orders/{id}` with a nonexistent ID returns HTTP 404 with structured error payload.
+All integration tests utilize Spring MockMvc and in-memory H2 in strict PostgreSQL compatibility mode (`application-test.yml`), allowing the complete test reactor to execute in under **2 minutes without requiring external Docker containers**:
+* [`OrderControllerIntegrationTest.java`](services/order-service/src/test/java/com/platform/order/controller/OrderControllerIntegrationTest.java): Validates `POST /api/v1/orders` persistence, UUID generation, `GET /orders/{id}` JSON retrieval, and RFC 7807 404 handler.
+* [`InventoryControllerIntegrationTest.java`](services/inventory-service/src/test/java/com/platform/inventory/controller/InventoryControllerIntegrationTest.java): Validates inventory query, seed data assertions, and missing SKU error propagation.
+* [`PaymentControllerIntegrationTest.java`](services/payment-service/src/test/java/com/platform/payment/controller/PaymentControllerIntegrationTest.java): Validates direct payment processing, simulated decline flows, and order payment lookup.
+
+### 3. Continuous Quality Gates & CI Pipeline
+* **JaCoCo Code Coverage**: Plugin `jacoco-maven-plugin` (v0.8.12) records bytecode coverage during test phase, generating XML/HTML execution reports into `target/site/jacoco`.
+* **SpotBugs Static Analysis**: Plugin `spotbugs-maven-plugin` (v4.8.6.2) audits for concurrency flaws, null-pointer dereferences, and mutable state exposure (`EI_EXPOSE_REP`).
+* **Checkstyle Code Hygiene**: Plugin `maven-checkstyle-plugin` (v3.4.0) with [`checkstyle.xml`](checkstyle.xml) enforcing clean formatting, import ordering, and naming standards.
+* **GitHub Actions CI**: Automated workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) triggers on every push and PR to `main`, validating the entire 7-module reactor on Ubuntu with Temurin JDK 17.
 
 ```bash
-# Run all tests across the 7 modules:
+# Run all unit and integration tests across the 7 modules:
 ./mvnw clean test
+
+# Run full verification including JaCoCo coverage reports:
+./mvnw clean verify
+
+# Run SpotBugs and Checkstyle static quality checks:
+./mvnw spotbugs:check checkstyle:check
 ```
+
+---
+
+## Failure Injection & Chaos Engineering Suite
+
+Distributed systems must be designed to survive downstream failure. The platform includes an automated chaos test suite in [`scripts/test-failure-injection.ps1`](scripts/test-failure-injection.ps1) and [`scripts/test-failure-injection.sh`](scripts/test-failure-injection.sh) validating 5 critical failure modes:
+
+| Scenario | Injected Fault | Expected System Behavior | Verified Outcome |
+|:---|:---|:---|:---|
+| **1. Stock Shortage** | Quantity requested exceeds inventory (`qty: 50000`) | Inventory publishes `INVENTORY_RESERVATION_FAILED`; Order Service aborts | Order status = `FAILED`, no orphan reservations created |
+| **2. Payment Decline** | Injected card token `CARD_FAIL_DECLINED` | Payment fails; Order publishes `ORDER_CANCELLED(compensationRequired=true)`; Inventory releases hold | Order = `CANCELLED`, Inventory stock restored to exact pre-order baseline |
+| **3. Insufficient Funds** | Magic amount `$999.99` triggered | Gateway simulator declines charge; automatic rollback compensation fires | Order = `CANCELLED`, payment marked `FAILED` |
+| **4. Validation Barrier** | Malformed UUIDs, negative quantities, empty fields | Spring Validation barrier catches errors before database mutation | HTTP 400 Bad Request returned with structured error breakdown |
+| **5. Idempotent Deduplication** | Rapid repeated replay of same event/order | `processed_events` table enforces unique `(event_id, consumer_name)` | Zero duplicate charges or duplicate stock deductions |
+
+```powershell
+# Run the Chaos / Failure Injection Suite:
+.\scripts\test-failure-injection.ps1 -GatewayUrl "http://localhost:8080"
+```
+
+---
+
+## Architecture Decision Records (ADRs)
+
+Key technical and architectural decisions are formally documented in the [`docs/adr/`](docs/adr/) directory using the Michael Nygard ADR standard:
+
+* **[ADR-0001: Saga Choreography vs. Centralized Orchestration](docs/adr/0001-saga-choreography-vs-orchestration.md)**: Rationale for event-driven choreography via RabbitMQ topic exchanges over centralized orchestrator bottlenecks.
+* **[ADR-0002: Database-per-Service Isolation Pattern](docs/adr/0002-database-per-service-pattern.md)**: Architectural boundary rules ensuring zero cross-service database coupling or shared schemas.
+* **[ADR-0003: RabbitMQ Topic Exchanges with Dead-Letter Queues](docs/adr/0003-rabbitmq-topic-exchanges-and-dlq.md)**: Routing key taxonomy, independent consumer queues, and DLQ quarantine pipelines.
+* **[ADR-0004: Redis Read-Through Caching Strategy](docs/adr/0004-redis-read-through-caching-strategy.md)**: Cache hit/miss lifecycle, 60-second TTL, and event-driven cache eviction on stock reservation.
+* **[ADR-0005: Idempotent Consumer Pattern via Processed Events Store](docs/adr/0005-idempotent-consumer-deduplication.md)**: Transactional event deduplication guaranteeing exactly-once semantics over AMQP.
+* **[ADR-0006: Resilience4j Circuit Breakers and Graceful Degradation](docs/adr/0006-resilience4j-fault-tolerance-and-rate-limiting.md)**: Fault containment, sliding window thresholds, and fast-failure fallbacks for external dependencies.
 
 ---
 
