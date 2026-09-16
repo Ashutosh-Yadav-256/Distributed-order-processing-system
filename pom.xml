@@ -28,6 +28,11 @@
         <jjwt.version>0.12.6</jjwt.version>
         <lombok.version>1.18.34</lombok.version>
         <aws.sdk.version>2.25.60</aws.sdk.version>
+
+        <!-- Code Quality & Testing Gates -->
+        <jacoco.version>0.8.12</jacoco.version>
+        <spotbugs.version>4.8.6.2</spotbugs.version>
+        <checkstyle.version>3.4.0</checkstyle.version>
     </properties>
 
 
@@ -172,7 +177,68 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${spotbugs.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${checkstyle.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <!-- JaCoCo Code Coverage Quality Gate -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- SpotBugs Static Analysis -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Medium</threshold>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
+
+            <!-- Checkstyle Style Enforcement -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>false</failsOnError>
+                    <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

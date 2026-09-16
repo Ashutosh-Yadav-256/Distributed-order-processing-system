@@ -1,0 +1,50 @@
+name: Continuous Integration & Quality Gates
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build, Test & Quality Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Grant Execute Permissions for Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Build and Run All Unit & Integration Tests
+        run: ./mvnw clean test verify -B
+
+      - name: Run Checkstyle Code Hygiene Gate
+        run: ./mvnw checkstyle:check -B
+        continue-on-error: true
+
+      - name: Run SpotBugs Static Analysis Gate
+        run: ./mvnw spotbugs:check -B
+        continue-on-error: true
+
+      - name: Upload JaCoCo Code Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-coverage-reports
+          path: |
+            **/target/site/jacoco/
+            **/target/jacoco.exec
+          retention-days: 14
