@@ -11,10 +11,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 
 import java.net.URI;
 
-/**
- * AWS S3 Client Configuration
- * Connects to Floci Local AWS Emulator (http://localhost:4566) or real AWS S3 endpoint.
- */
 @Slf4j
 @Configuration
 public class AwsS3Config {
@@ -40,7 +36,7 @@ public class AwsS3Config {
                     .region(Region.of(region))
                     .credentialsProvider(StaticCredentialsProvider.create(
                             AwsBasicCredentials.create(accessKey, secretKey)))
-                    .forcePathStyle(true) // Required for S3 emulators like Floci and LocalStack
+                    .forcePathStyle(true)
                     .build();
         } catch (Exception e) {
             log.warn("Failed to initialize S3Client with endpoint {}. Using fallback.", endpointUrl, e);

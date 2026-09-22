@@ -4,11 +4,7 @@
   },
   "interactions": [
     {
-      "comments": {
-        "text": [
-
-        ]
-      },
+      
       "description": "a request to retrieve payment status for an order",
       "key": "858bb341",
       "pending": false,

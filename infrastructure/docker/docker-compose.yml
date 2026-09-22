@@ -1,9 +1,6 @@
 version: '3.8'
 
 services:
-  # -------------------------------------------------------------
-  # Infrastructure Data Stores & Messaging
-  # -------------------------------------------------------------
   postgres:
     image: postgres:16-alpine
     container_name: platform-postgres
@@ -53,9 +50,6 @@ services:
     networks:
       - platform-network
 
-  # -------------------------------------------------------------
-  # Observability
-  # -------------------------------------------------------------
   prometheus:
     image: prom/prometheus:v2.54.1
     container_name: platform-prometheus
@@ -79,9 +73,6 @@ services:
     networks:
       - platform-network
 
-  # -------------------------------------------------------------
-  # Core Platform Microservices
-  # -------------------------------------------------------------
   api-gateway:
     build:
       context: ../../services/api-gateway
@@ -202,10 +193,6 @@ services:
     networks:
       - platform-network
 
-  # -------------------------------------------------------------
-  # Floci: Lightweight Open-Source Local AWS Cloud Emulator
-  # (Emulates S3, SQS, SNS, Secrets Manager on Port 4566 in ~24ms)
-  # -------------------------------------------------------------
   floci-aws:
     image: floci/floci:latest
     container_name: platform-floci-aws

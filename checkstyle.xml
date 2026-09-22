@@ -7,7 +7,7 @@
     <property name="severity" value="warning"/>
     <property name="fileExtensions" value="java, properties, xml"/>
 
-    <!-- Checks for whitespace -->
+    
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
@@ -19,7 +19,7 @@
     </module>
 
     <module name="TreeWalker">
-        <!-- Naming Conventions -->
+        
         <module name="PackageName">
             <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
         </module>
@@ -30,17 +30,17 @@
         <module name="ClassTypeParameterName"/>
         <module name="MethodTypeParameterName"/>
 
-        <!-- Imports -->
+        
         <module name="AvoidStarImport"/>
         <module name="IllegalImport"/>
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
 
-        <!-- Modifiers -->
+        
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
 
-        <!-- Whitespace -->
+        
         <module name="GenericWhitespace"/>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceAfter"/>
@@ -48,7 +48,7 @@
         <module name="ParenPad"/>
         <module name="WhitespaceAfter"/>
 
-        <!-- Coding -->
+        
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
         <module name="SimplifyBooleanExpression"/>
@@ -57,7 +57,7 @@
         <module name="DefaultComesLast"/>
         <module name="MultipleVariableDeclarations"/>
 
-        <!-- Blocks -->
+        
         <module name="NeedBraces"/>
         <module name="LeftCurly"/>
         <module name="RightCurly"/>

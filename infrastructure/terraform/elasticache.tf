@@ -1,4 +1,3 @@
-# Amazon ElastiCache Redis cluster for hot inventory caching and rate limiting
 resource "aws_elasticache_subnet_group" "redis_subnet_group" {
   name       = "order-platform-redis-subnets"
   subnet_ids = aws_subnet.private[*].id

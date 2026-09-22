@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Redis Read-Through Caching Benchmark Script (Bash)
-# Measures latency differences between direct PostgreSQL queries and Redis-cached queries.
 
 set -euo pipefail
 
@@ -12,7 +10,6 @@ echo " Inventory Service - Redis Read-Through Cache Benchmark"
 echo " Target URL: $INVENTORY_URL | Requests per test: $ITERATIONS"
 echo "================================================================"
 
-# Check health
 if ! curl -sf "$INVENTORY_URL/actuator/health" > /dev/null; then
     echo "[FAIL] Failed to reach Inventory Service at $INVENTORY_URL."
     echo "  Please ensure the service is running."
@@ -20,7 +17,6 @@ if ! curl -sf "$INVENTORY_URL/actuator/health" > /dev/null; then
 fi
 echo "[PASS] Inventory service is healthy."
 
-# Fetch or seed product
 PRODUCTS_JSON=$(curl -sf "$INVENTORY_URL/api/v1/inventory")
 PRODUCT_ID=$(echo "$PRODUCTS_JSON" | grep -o '"productId":"[^"]*' | head -n 1 | cut -d'"' -f4 || true)
 
@@ -35,7 +31,6 @@ fi
 echo "Benchmarking Product ID: $PRODUCT_ID"
 echo ""
 
-# 1. Warm Cache benchmark
 echo "1. Warming up Redis cache..."
 curl -sf "$INVENTORY_URL/api/v1/inventory/$PRODUCT_ID" > /dev/null
 sleep 0.1
@@ -44,12 +39,10 @@ echo "2. Running $ITERATIONS warm requests (Redis Cache HIT)..."
 WARM_TIMES_FILE=$(mktemp)
 for i in $(seq 1 "$ITERATIONS"); do
     TIME_TAKEN=$(curl -o /dev/null -s -w '%{time_total}\n' "$INVENTORY_URL/api/v1/inventory/$PRODUCT_ID")
-    # Convert seconds to ms
     TIME_MS=$(awk "BEGIN {print $TIME_TAKEN * 1000}")
     echo "$TIME_MS" >> "$WARM_TIMES_FILE"
 done
 
-# 2. Cold benchmark (evicting cache before each call)
 echo "3. Running $ITERATIONS cold requests (Forced DB Fetch)..."
 COLD_TIMES_FILE=$(mktemp)
 for i in $(seq 1 "$ITERATIONS"); do
@@ -59,7 +52,6 @@ for i in $(seq 1 "$ITERATIONS"); do
     echo "$TIME_MS" >> "$COLD_TIMES_FILE"
 done
 
-# Calculate stats
 calc_stats() {
     sort -n "$1" | awk '
     BEGIN { c = 0; sum = 0; }

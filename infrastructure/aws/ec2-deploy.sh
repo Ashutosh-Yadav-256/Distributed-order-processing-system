@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Turnkey deployment script for AWS EC2 instance
-# Builds and starts the distributed order processing system containers.
 
 set -euo pipefail
 
@@ -8,7 +6,6 @@ echo "================================================================"
 echo " Distributed Order Processing System - AWS EC2 Deployer"
 echo "================================================================"
 
-# Check Docker
 if ! docker info > /dev/null 2>&1; then
     echo "[FAIL] Docker is not running or current user lacks permissions."
     echo "  Try: sudo systemctl start docker && sudo usermod -aG docker \$USER"

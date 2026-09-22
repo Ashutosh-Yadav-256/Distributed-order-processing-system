@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Exchanges
     @Bean
     public TopicExchange orderExchange() {
         return new TopicExchange(RabbitMQConstants.ORDER_EXCHANGE, true, false);
@@ -33,7 +32,6 @@ public class RabbitMQConfig {
         return new TopicExchange(RabbitMQConstants.DLQ_EXCHANGE, true, false);
     }
 
-    // Response Queues for Order Saga
     @Bean
     public Queue orderInventoryResponseQueue() {
         return QueueBuilder.durable(RabbitMQConstants.ORDER_INVENTORY_RESPONSE_QUEUE)
@@ -55,7 +53,6 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(RabbitMQConstants.ORDER_DLQ).build();
     }
 
-    // Bindings
     @Bean
     public Binding inventoryReservedBinding(
             @org.springframework.beans.factory.annotation.Qualifier("orderInventoryResponseQueue") Queue orderInventoryResponseQueue,
@@ -101,7 +98,6 @@ public class RabbitMQConfig {
                 .with(RabbitMQConstants.DLQ_ROUTING_KEY_PREFIX + "order.#");
     }
 
-    // Message Converter
     @Bean
     public MessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();

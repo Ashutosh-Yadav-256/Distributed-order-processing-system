@@ -13,10 +13,6 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Consumer client for inter-service communication with payment-service.
- * Validated via Pact consumer-driven contract testing.
- */
 @Component
 public class PaymentClient {
 

@@ -1,7 +1,3 @@
-# ==============================================================================
-# Failure Injection & Chaos Engineering Test Suite
-# Tests automated recovery, compensating transactions, idempotency, and fault isolation
-# ==============================================================================
 param(
     [string]$GatewayUrl = "http://localhost:8080"
 )
@@ -29,7 +25,6 @@ function Write-Info([string]$msg) {
 Write-Header "DISTRIBUTED SAGA FAILURE INJECTION SUITE"
 Write-Info "Target Gateway: $GatewayUrl"
 
-# Step 0: Acquire Auth Token
 Write-Info "Acquiring Bearer token from auth endpoint..."
 try {
     $authBody = @{ email = "chaos-tester@platform.com"; roles = @("ROLE_ADMIN", "ROLE_USER") } | ConvertTo-Json
@@ -45,9 +40,6 @@ try {
     exit 1
 }
 
-# ------------------------------------------------------------------------------
-# SCENARIO 1: Insufficient Stock (Immediate Saga Abort)
-# ------------------------------------------------------------------------------
 Write-Header "CHAOS SCENARIO 1: INSUFFICIENT STOCK SHORTAGE"
 Write-Info "Attempting to order 50,000 units of an item with limited inventory..."
 
@@ -79,13 +71,9 @@ if ($checkedOrder1.status -eq "FAILED") {
     Write-Fail "Order status is $($checkedOrder1.status), expected FAILED"
 }
 
-# ------------------------------------------------------------------------------
-# SCENARIO 2: Downstream Payment Failure & Compensating Stock Rollback
-# ------------------------------------------------------------------------------
 Write-Header "CHAOS SCENARIO 2: PAYMENT DECLINE & COMPENSATING TRANSACTION"
 $monitorProductId = "44444444-4444-4444-4444-444444444444"
 
-# Check initial available stock
 $invBefore = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/inventory/$monitorProductId" -Method Get -Headers $headers).data
 $stockBefore = $invBefore.availableQuantity
 Write-Info "Baseline available stock for UltraWide Monitor: $stockBefore"
@@ -129,9 +117,6 @@ if ($stockAfter -eq $stockBefore) {
     Write-Fail "COMPENSATION LEAK: Stock mismatch ($stockBefore before vs $stockAfter after)!"
 }
 
-# ------------------------------------------------------------------------------
-# SCENARIO 3: Magic Amount Fault Injection ($999.99 Insufficient Funds)
-# ------------------------------------------------------------------------------
 Write-Header "CHAOS SCENARIO 3: MAGIC AMOUNT INSUFFICIENT FUNDS TRIGGER"
 Write-Info "Submitting order with exact total of $999.99..."
 
@@ -163,9 +148,6 @@ if ($checkedOrder3.status -eq "CANCELLED") {
     Write-Fail "Expected CANCELLED status, but got $($checkedOrder3.status)"
 }
 
-# ------------------------------------------------------------------------------
-# SCENARIO 4: Malformed Request / Validation Boundary Injection
-# ------------------------------------------------------------------------------
 Write-Header "CHAOS SCENARIO 4: VALIDATION BOUNDARY FAULT INJECTION"
 Write-Info "Submitting order with invalid payload (negative quantity & zero price)..."
 
@@ -196,9 +178,6 @@ try {
     }
 }
 
-# ------------------------------------------------------------------------------
-# SCENARIO 5: Idempotency & Replay Resiliency Check
-# ------------------------------------------------------------------------------
 Write-Header "CHAOS SCENARIO 5: IDEMPOTENT CONSUMER DEDUPLICATION CHECK"
 Write-Info "Verifying processed_events table and state transitions prevent duplicate side-effects..."
 $ordersList = (Invoke-RestMethod -Uri "$GatewayUrl/api/v1/orders/customer/22222222-2222-2222-2222-222222222222" -Method Get -Headers $headers).data

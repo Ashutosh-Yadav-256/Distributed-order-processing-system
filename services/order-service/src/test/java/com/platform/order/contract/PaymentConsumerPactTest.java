@@ -20,10 +20,6 @@ import java.util.UUID;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Pact Consumer Test: order-service (Consumer) -> payment-service (Provider)
- * Formulates inter-service HTTP expectations and outputs target/pacts/order-service-payment-service.json
- */
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "payment-service")
 public class PaymentConsumerPactTest {

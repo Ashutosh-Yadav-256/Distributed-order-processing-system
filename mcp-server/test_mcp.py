@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Automated Test Suite for Distributed Order Platform MCP Server
-Sends JSON-RPC 2.0 messages over stdio subprocess and verifies responses.
-"""
 
 import subprocess
 import json
@@ -43,7 +39,6 @@ def run_tests():
     )
 
     try:
-        # Test 1: Initialize
         print("\n[Test 1] Sending 'initialize' request...")
         req1 = {
             "jsonrpc": "2.0",
@@ -56,7 +51,6 @@ def run_tests():
         assert "serverInfo" in res1["result"], "Missing serverInfo"
         print(f"[OK] Initialize passed: {res1['result']['serverInfo']['name']} v{res1['result']['serverInfo']['version']}")
 
-        # Test 2: Tools List
         print("\n[Test 2] Sending 'tools/list' request...")
         req2 = {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}
         res2 = send_recv(proc, req2)
@@ -69,7 +63,6 @@ def run_tests():
         assert "get_s3_invoices" in tool_names
         assert "run_saga_scenario" in tool_names
 
-        # Test 3: Tool Call - get_system_health
         print("\n[Test 3] Calling tool 'get_system_health'...")
         req3 = {
             "jsonrpc": "2.0",
@@ -84,7 +77,6 @@ def run_tests():
         print(f"[PASS] Health check returned status: {health_json.get('status')}")
         assert health_json.get("status") == "UP"
 
-        # Test 4: Tool Call - check_inventory
         print("\n[Test 4] Calling tool 'check_inventory'...")
         req4 = {
             "jsonrpc": "2.0",
@@ -98,7 +90,6 @@ def run_tests():
         print(f"[PASS] Inventory check returned {len(products)} products in catalog.")
         assert len(products) >= 4
 
-        # Test 5: Tool Call - run_saga_scenario (happy_path)
         print("\n[Test 5] Calling tool 'run_saga_scenario' (happy_path)...")
         req5 = {
             "jsonrpc": "2.0",
@@ -112,7 +103,6 @@ def run_tests():
         print(scenario_text[:200] + "...")
         assert "CONFIRMED" in scenario_text
 
-        # Test 6: Resources List & Read
         print("\n[Test 6] Testing 'resources/list' and 'resources/read'...")
         req6 = {"jsonrpc": "2.0", "id": 6, "method": "resources/list"}
         res6 = send_recv(proc, req6)

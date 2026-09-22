@@ -64,7 +64,6 @@ class InventoryControllerIntegrationTest {
                 .reservedQuantity(0)
                 .build();
 
-        // 1. POST /api/v1/inventory - Create product
         MvcResult createResult = mockMvc.perform(post("/api/v1/inventory")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newProduct)))
@@ -75,15 +74,12 @@ class InventoryControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.availableQuantity", is(250)))
                 .andReturn();
 
-        // Extract ID
         JsonNode rootNode = objectMapper.readTree(createResult.getResponse().getContentAsString());
         UUID productId = UUID.fromString(rootNode.path("data").path("productId").asText());
 
-        // Verify repository state
         assertThat(productRepository.findById(productId)).isPresent();
         assertThat(productRepository.findById(productId).get().getName()).isEqualTo("RGB Mechanical Gaming Keyboard");
 
-        // 2. GET /api/v1/inventory/{productId} - Read back product
         mockMvc.perform(get("/api/v1/inventory/{productId}", productId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

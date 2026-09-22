@@ -1,4 +1,3 @@
-# PowerShell script to seed initial inventory data through the API Gateway
 param(
     [string]$GatewayUrl = "http://localhost:8080"
 )
@@ -7,7 +6,6 @@ Write-Host "==================================================" -ForegroundColor
 Write-Host " Seeding Inventory via API Gateway: $GatewayUrl" -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 
-# 1. Obtain test JWT token from Gateway
 Write-Host "1. Fetching JWT authentication token..." -ForegroundColor Yellow
 $tokenBody = @{
     email = "admin@orderplatform.com"
@@ -28,7 +26,6 @@ $headers = @{
     "Content-Type"  = "application/json"
 }
 
-# 2. Seed catalog products
 $products = @(
     @{
         productId = "11111111-1111-1111-1111-111111111111"

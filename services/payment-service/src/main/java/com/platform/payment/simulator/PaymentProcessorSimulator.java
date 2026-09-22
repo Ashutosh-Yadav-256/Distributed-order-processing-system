@@ -27,7 +27,6 @@ public class PaymentProcessorSimulator {
     public ProcessingResult process(BigDecimal amount, String currency, String paymentMethod) {
         log.info("Simulating payment processing for amount: {} {}, method: {}", amount, currency, paymentMethod);
 
-        // Deterministic failure triggers for automated test suites
         if (paymentMethod != null && paymentMethod.toUpperCase().contains("FAIL")) {
             log.warn("Simulated payment failed due to FAIL flag in payment method: {}", paymentMethod);
             return ProcessingResult.builder()
@@ -44,7 +43,6 @@ public class PaymentProcessorSimulator {
                     .build();
         }
 
-        // Simulate successful charge
         String transactionId = "txn_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
         log.info("Simulated payment SUCCESS. Generated transactionId: {}", transactionId);
 

@@ -47,7 +47,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
 
-        // Allow open endpoints without JWT validation
         for (String openEndpoint : OPEN_ENDPOINTS) {
             if (path.contains(openEndpoint)) {
                 return chain.filter(exchange);
@@ -74,7 +73,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             List<String> roles = claims.get("roles", List.class);
             String rolesStr = roles != null ? String.join(",", roles) : "ROLE_USER";
 
-            // Mutate request by injecting downstream identity headers
             ServerHttpRequest mutatedRequest = request.mutate()
                     .header(HeaderConstants.USER_ID_HEADER, userId)
                     .header(HeaderConstants.USER_EMAIL_HEADER, email != null ? email : "")
@@ -114,6 +112,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -10; // Execute before route forwarding
+        return -10;
     }
 }

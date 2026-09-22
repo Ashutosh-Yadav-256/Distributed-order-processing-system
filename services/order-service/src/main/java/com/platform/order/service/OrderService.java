@@ -66,7 +66,6 @@ public class OrderService {
         Order savedOrder = orderRepository.save(order);
         log.info("Order {} created with status PENDING. Total: {} {}", savedOrder.getId(), totalAmount, savedOrder.getCurrency());
 
-        // Construct and publish OrderCreatedEvent
         List<OrderItemDto> itemDtos = savedOrder.getItems().stream()
                 .map(i -> OrderItemDto.builder()
                         .productId(i.getProductId())
@@ -214,7 +213,6 @@ public class OrderService {
                             .build())
                     .collect(Collectors.toList());
 
-            // Publish compensation event so Inventory Service releases the reserved stock
             OrderCancelledEvent event = OrderCancelledEvent.builder()
                     .eventId(UUID.randomUUID())
                     .orderId(cancelledOrder.getId())

@@ -7,7 +7,6 @@ echo "========================================================"
 echo " Running Distributed Saga E2E Scenarios against $GATEWAY_URL"
 echo "========================================================"
 
-# Fetch Token
 TOKEN_RES=$(curl -s -X POST "$GATEWAY_URL/api/v1/auth/token" \
   -H "Content-Type: application/json" \
   -d '{"email": "tester@platform.com", "roles": ["ROLE_USER"]}')

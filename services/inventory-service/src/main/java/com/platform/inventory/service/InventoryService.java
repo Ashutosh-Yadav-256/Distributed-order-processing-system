@@ -40,7 +40,7 @@ public class InventoryService {
             int updated = productRepository.reserveStock(item.getProductId(), item.getQuantity());
 
             if (updated == 0) {
-                // Insufficient stock or product missing -> Roll back partial reservations
+
                 log.warn("Insufficient stock for product: {} (requested: {}). Rolling back reservations for order: {}",
                         item.getProductId(), item.getQuantity(), orderId);
 
@@ -50,7 +50,6 @@ public class InventoryService {
                     cacheService.evict(rollbackItem.getProductId());
                 }
 
-                // Publish failure event to RabbitMQ
                 InventoryReservationFailedEvent failedEvent = InventoryReservationFailedEvent.builder()
                         .eventId(UUID.randomUUID())
                         .orderId(orderId)
@@ -64,7 +63,6 @@ public class InventoryService {
                 return false;
             }
 
-            // Save reservation record
             StockReservation reservation = StockReservation.builder()
                     .orderId(orderId)
                     .productId(item.getProductId())
@@ -76,13 +74,11 @@ public class InventoryService {
             reservationRepository.save(reservation);
             successfulReservations.add(reservation);
 
-            // Invalidate/update cache
             cacheService.evict(item.getProductId());
         }
 
         log.info("Successfully reserved all items for orderId: {}", orderId);
 
-        // Publish success event to RabbitMQ
         InventoryReservedEvent reservedEvent = InventoryReservedEvent.builder()
                 .eventId(UUID.randomUUID())
                 .orderId(orderId)
@@ -129,7 +125,7 @@ public class InventoryService {
 
     @Transactional(readOnly = true)
     public ProductInventory getProductInventory(UUID productId) {
-        // Read-through cache check: return from Redis if present, else fallback to PostgreSQL
+
         return cacheService.getCachedProduct(productId).orElseGet(() -> {
             ProductInventory inventory = productRepository.findById(productId)
                     .orElseThrow(() -> new ResourceNotFoundException("Product inventory not found for id: " + productId));

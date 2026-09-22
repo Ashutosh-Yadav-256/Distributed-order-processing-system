@@ -1,4 +1,3 @@
-# Amazon EKS Cluster Definition
 resource "aws_iam_role" "eks_cluster_role" {
   name = "order-platform-eks-cluster-role"
 

@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""
-Distributed Order Processing System — Model Context Protocol (MCP) Server
-Allows AI coding assistants (Antigravity, Claude Desktop, Cursor) to interact
-natively with the order platform, execute Saga transactions, check stock, and inspect S3 invoices.
-
-Protocol: Standard JSON-RPC 2.0 over stdio (MCP Specification 2024-11-05).
-Dependencies: Zero (Uses Python standard library only for instant portability).
-"""
 
 import sys
 import json
@@ -16,9 +8,6 @@ import urllib.error
 
 API_BASE = os.environ.get("PLATFORM_API_BASE", "http://localhost:4000")
 
-# -------------------------------------------------------------
-# HTTP Client Helper
-# -------------------------------------------------------------
 def make_api_request(endpoint, method="GET", body=None, token=None):
     url = f"{API_BASE}{endpoint}"
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -41,9 +30,6 @@ def make_api_request(endpoint, method="GET", body=None, token=None):
     except Exception as e:
         return {"error": str(e), "message": f"Could not connect to Platform API at {API_BASE}. Is the server running?"}
 
-# -------------------------------------------------------------
-# MCP Tool Definitions
-# -------------------------------------------------------------
 TOOLS = [
     {
         "name": "get_system_health",
@@ -147,9 +133,6 @@ TOOLS = [
     }
 ]
 
-# -------------------------------------------------------------
-# MCP Resources Definitions
-# -------------------------------------------------------------
 RESOURCES = [
     {
         "uri": "order://catalog",
@@ -165,9 +148,6 @@ RESOURCES = [
     }
 ]
 
-# -------------------------------------------------------------
-# Tool Execution Handlers
-# -------------------------------------------------------------
 def handle_tool_call(tool_name, arguments):
     if tool_name == "get_system_health":
         data = make_api_request("/actuator/health")
@@ -268,9 +248,6 @@ def format_text_result(text, is_error=False):
         "isError": is_error
     }
 
-# -------------------------------------------------------------
-# Main JSON-RPC 2.0 Dispatcher Loop
-# -------------------------------------------------------------
 def process_message(line):
     if not line.strip():
         return None
@@ -287,7 +264,6 @@ def process_message(line):
     method = req.get("method")
     params = req.get("params", {})
 
-    # 1. Initialize
     if method == "initialize":
         return {
             "jsonrpc": "2.0",
@@ -305,15 +281,12 @@ def process_message(line):
             }
         }
 
-    # 2. Initialized notification (no response needed according to JSON-RPC specs if id is None)
     if method == "notifications/initialized":
         return None
 
-    # 3. Ping
     if method == "ping":
         return {"jsonrpc": "2.0", "id": msg_id, "result": {}}
 
-    # 4. Tools List
     if method == "tools/list":
         return {
             "jsonrpc": "2.0",
@@ -321,7 +294,6 @@ def process_message(line):
             "result": {"tools": TOOLS}
         }
 
-    # 5. Tools Call
     if method == "tools/call":
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
@@ -332,7 +304,6 @@ def process_message(line):
             "result": result
         }
 
-    # 6. Resources List
     if method == "resources/list":
         return {
             "jsonrpc": "2.0",
@@ -340,7 +311,6 @@ def process_message(line):
             "result": {"resources": RESOURCES}
         }
 
-    # 7. Resources Read
     if method == "resources/read":
         uri = params.get("uri")
         if uri == "order://catalog":
@@ -368,7 +338,6 @@ def process_message(line):
                 "error": {"code": -32602, "message": f"Unknown resource URI: {uri}"}
             }
 
-    # Unhandled method
     if msg_id is not None:
         return {
             "jsonrpc": "2.0",
@@ -378,7 +347,6 @@ def process_message(line):
     return None
 
 def main():
-    # Force unbuffered stdin/stdout
     sys.stdin.reconfigure(encoding='utf-8')
     sys.stdout.reconfigure(encoding='utf-8')
 

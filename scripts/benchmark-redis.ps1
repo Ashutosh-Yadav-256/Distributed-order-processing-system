@@ -1,6 +1,3 @@
-# Redis Read-Through Caching Benchmark Script
-# Measures latency differences between direct PostgreSQL queries and Redis-cached queries.
-# Generates defensible metrics and percentiles (P50, P95, P99) for resumes and interviews.
 
 param(
     [string]$InventoryUrl = "http://localhost:8082",
@@ -12,7 +9,6 @@ Write-Host " Inventory Service - Redis Read-Through Cache Benchmark" -Foreground
 Write-Host " Target URL: $InventoryUrl | Requests per test: $Iterations" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
-# 1. Health check
 try {
     $health = Invoke-RestMethod -Uri "$InventoryUrl/actuator/health" -Method Get -TimeoutSec 3 -ErrorAction Stop
     Write-Host "[PASS] Inventory service is healthy ($($health.status))." -ForegroundColor Green
@@ -22,7 +18,6 @@ try {
     exit 1
 }
 
-# 2. Get or create benchmark product
 $products = Invoke-RestMethod -Uri "$InventoryUrl/api/v1/inventory" -Method Get
 if ($products.data.Count -gt 0) {
     $product = $products.data[0]
@@ -42,7 +37,6 @@ if ($products.data.Count -gt 0) {
 $productId = $product.productId
 Write-Host "Benchmark Product: $($product.name) (ID: $productId)`n" -ForegroundColor Cyan
 
-# Helper to compute percentiles
 function Get-Percentile($samples, $p) {
     $sorted = $samples | Sort-Object
     $index = [Math]::Ceiling(($p / 100.0) * $sorted.Count) - 1
@@ -62,9 +56,7 @@ function Calculate-Stats($times) {
     }
 }
 
-# 3. Benchmark Warm Cache (Redis Hit)
 Write-Host "1. Warming up Redis cache..." -ForegroundColor Yellow
-# Prime cache
 Invoke-RestMethod -Uri "$InventoryUrl/api/v1/inventory/$productId" -Method Get | Out-Null
 Start-Sleep -Milliseconds 100
 
@@ -81,12 +73,10 @@ for ($i = 1; $i -le $Iterations; $i++) {
 }
 $warmStats = Calculate-Stats $warmTimes
 
-# 4. Benchmark Cold Requests (Evicting from Redis prior to query to force PostgreSQL fetch)
 Write-Host "`n3. Running $Iterations cold requests (Forced PostgreSQL DB Fetch)..." -ForegroundColor Yellow
 $coldTimes = @()
 
 for ($i = 1; $i -le $Iterations; $i++) {
-    # Evict key from redis using docker if available
     try {
         docker exec platform-redis redis-cli del "inventory:product:$productId" 2>$null | Out-Null
     } catch {}
@@ -99,7 +89,6 @@ for ($i = 1; $i -le $Iterations; $i++) {
 }
 $coldStats = Calculate-Stats $coldTimes
 
-# 5. Display Benchmark Results
 $speedupAvg = [Math]::Round($coldStats.Avg / [Math]::Max($warmStats.Avg, 0.01), 1)
 $speedupP95 = [Math]::Round($coldStats.P95 / [Math]::Max($warmStats.P95, 0.01), 1)
 $speedupP99 = [Math]::Round($coldStats.P99 / [Math]::Max($warmStats.P99, 0.01), 1)

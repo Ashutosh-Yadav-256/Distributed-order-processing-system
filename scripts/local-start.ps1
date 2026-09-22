@@ -1,10 +1,8 @@
-# Local bootstrap script for Distributed Order Processing System
 
 Write-Host "========================================================" -ForegroundColor Cyan
 Write-Host " Distributed Order Processing System - Local Bootstrapper" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
-# 1. Check if Docker daemon is running
 try {
     docker info 2>&1 | Out-Null
     Write-Host "[PASS] Docker daemon is active." -ForegroundColor Green
@@ -13,7 +11,6 @@ try {
     exit 1
 }
 
-# 2. Package Java artifacts if needed
 $jarsExist = (Test-Path "services\api-gateway\target\*.jar") -and
              (Test-Path "services\order-service\target\*.jar") -and
              (Test-Path "services\inventory-service\target\*.jar") -and
@@ -25,7 +22,6 @@ if (-not $jarsExist) {
     .\mvnw.cmd clean package -DskipTests
 }
 
-# 3. Spin up Docker Compose
 Write-Host "`nStarting Docker Compose containers..." -ForegroundColor Yellow
 docker compose -f infrastructure\docker\docker-compose.yml up -d --build
 

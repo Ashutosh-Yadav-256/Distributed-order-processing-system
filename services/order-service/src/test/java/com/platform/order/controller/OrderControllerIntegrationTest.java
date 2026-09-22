@@ -80,7 +80,6 @@ class OrderControllerIntegrationTest {
                 .paymentMethod("CREDIT_CARD")
                 .build();
 
-        // 1. POST /api/v1/orders - Save row to database
         MvcResult createResult = mockMvc.perform(post("/api/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
@@ -94,19 +93,15 @@ class OrderControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.items[0].productName", is("Mechanical Keyboard Pro")))
                 .andReturn();
 
-        // Verify event was published for the Saga
         verify(orderEventPublisher, times(1)).publishOrderCreated(any());
 
-        // Extract generated Order UUID
         JsonNode rootNode = objectMapper.readTree(createResult.getResponse().getContentAsString());
         String orderIdStr = rootNode.path("data").path("id").asText();
         UUID orderId = UUID.fromString(orderIdStr);
 
-        // Verify row exists directly in the repository/database
         assertThat(orderRepository.findById(orderId)).isPresent();
         assertThat(orderRepository.findById(orderId).get().getItems()).hasSize(1);
 
-        // 2. GET /api/v1/orders/{id} - Read the persisted row back via HTTP
         mockMvc.perform(get("/api/v1/orders/{id}", orderId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

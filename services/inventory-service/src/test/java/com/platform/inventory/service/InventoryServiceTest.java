@@ -99,7 +99,6 @@ class InventoryServiceTest {
                 .createdAt(Instant.now())
                 .build();
 
-        // Simulate zero rows updated (insufficient stock)
         when(productRepository.reserveStock(eq(productId), eq(50))).thenReturn(0);
 
         boolean result = inventoryService.reserveStock(event);

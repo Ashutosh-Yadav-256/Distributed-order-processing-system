@@ -18,9 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Service to archive customer order invoices to Amazon S3 (Floci or AWS).
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,9 +29,6 @@ public class S3InvoiceArchiverService {
     @Value("${aws.s3.invoice-bucket:ecommerce-order-invoices}")
     private String bucketName;
 
-    /**
-     * Upload an archived JSON invoice to Amazon S3.
-     */
     public boolean archiveInvoice(String orderId, String customerId, String customerEmail, BigDecimal totalAmount, String currency) {
         if (s3Client == null) {
             log.warn("S3Client is null; skipping invoice upload to S3.");
@@ -82,7 +76,7 @@ public class S3InvoiceArchiverService {
             log.info("Bucket {} does not exist in Floci S3. Creating bucket...", bucketName);
             s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
         } catch (Exception e) {
-            // Bucket might already exist or head check not supported by emulator version
+
             log.debug("HeadBucket check info: {}", e.getMessage());
         }
     }

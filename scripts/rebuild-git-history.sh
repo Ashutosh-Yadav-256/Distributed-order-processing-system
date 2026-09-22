@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Rebuilds the Git commit history into a realistic 12-stage engineering narrative
-# Eliminates the "machine-generated single commit" red flag for recruiters.
 
 set -euo pipefail
 

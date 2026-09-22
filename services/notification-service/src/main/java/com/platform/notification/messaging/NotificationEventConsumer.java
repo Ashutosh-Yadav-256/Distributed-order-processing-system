@@ -57,7 +57,6 @@ public class NotificationEventConsumer {
                             orderConfirmed.getTotalAmount(), orderConfirmed.getCurrency())
             );
 
-            // Archive customer invoice to Floci AWS S3 emulator
             try {
                 s3InvoiceArchiverService.archiveInvoice(
                         orderConfirmed.getOrderId() != null ? orderConfirmed.getOrderId().toString() : "",
@@ -95,7 +94,7 @@ public class NotificationEventConsumer {
 
             notificationService.sendNotification(
                     paymentFailed.getOrderId(),
-                    paymentFailed.getOrderId(), // fallback customerId
+                    paymentFailed.getOrderId(),
                     "customer@example.com",
                     NotificationChannel.EMAIL,
                     "Payment Alert for Order #" + paymentFailed.getOrderId(),

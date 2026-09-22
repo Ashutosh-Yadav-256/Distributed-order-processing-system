@@ -24,10 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * Pact Provider Test: payment-service
- * Validates that payment-service satisfies the contract defined by order-service.
- */
 @SpringBootTest(classes = PaymentApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Provider("payment-service")
 @PactFolder("pacts")

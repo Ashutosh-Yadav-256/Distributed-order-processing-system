@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# AWS EC2 User Data script for Amazon Linux 2023 / Ubuntu 22.04
-# Automatically provisions Docker, Docker Compose, Swap memory, and firewall.
 
 set -e
 
@@ -16,18 +14,15 @@ fi
 
 echo "=== 2. Installing Docker & Docker Compose ==="
 if command -v dnf &> /dev/null; then
-    # Amazon Linux 2023
     dnf update -y
     dnf install -y docker git
     systemctl enable --now docker
     usermod -aG docker ec2-user
-    # Install Compose v2
     mkdir -p /usr/local/lib/docker/cli-plugins
     curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
     chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     ln -s /usr/local/lib/docker/cli-plugins/docker-compose /usr/bin/docker-compose || true
 elif command -v apt-get &> /dev/null; then
-    # Ubuntu
     apt-get update -y
     apt-get install -y docker.io docker-compose-v2 git curl
     systemctl enable --now docker

@@ -1,4 +1,3 @@
-# Amazon RDS PostgreSQL Instance for authoritative persistence
 resource "aws_db_subnet_group" "platform_db_subnet_group" {
   name       = "order-platform-rds-subnets"
   subnet_ids = aws_subnet.private[*].id

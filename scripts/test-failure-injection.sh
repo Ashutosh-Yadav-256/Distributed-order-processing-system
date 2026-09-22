@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Failure Injection & Chaos Engineering Test Suite (Bash / Linux / macOS / WSL)
-# Tests automated recovery, compensating transactions, idempotency, and fault isolation
-# ==============================================================================
 set -euo pipefail
 
 GATEWAY_URL="${1:-http://localhost:8080}"
@@ -26,7 +22,6 @@ info() { echo -e "  ${GRAY}[INFO]${NC} $1"; }
 header "DISTRIBUTED SAGA FAILURE INJECTION SUITE"
 info "Target Gateway: $GATEWAY_URL"
 
-# Step 0: Acquire Auth Token
 info "Acquiring Bearer token from auth endpoint..."
 TOKEN_RES=$(curl -s -X POST "$GATEWAY_URL/api/v1/auth/token" \
     -H "Content-Type: application/json" \
@@ -42,9 +37,6 @@ pass "JWT token acquired successfully."
 
 AUTH_HEADER="Authorization: Bearer $TOKEN"
 
-# ------------------------------------------------------------------------------
-# SCENARIO 1: Insufficient Stock (Immediate Saga Abort)
-# ------------------------------------------------------------------------------
 header "CHAOS SCENARIO 1: INSUFFICIENT STOCK SHORTAGE"
 info "Attempting to order 50,000 units of an item with limited inventory..."
 
@@ -79,9 +71,6 @@ else
     fail "Order status is $STATUS1, expected FAILED"
 fi
 
-# ------------------------------------------------------------------------------
-# SCENARIO 2: Downstream Payment Failure & Compensating Stock Rollback
-# ------------------------------------------------------------------------------
 header "CHAOS SCENARIO 2: PAYMENT DECLINE & COMPENSATING TRANSACTION"
 MONITOR_ID="44444444-4444-4444-4444-444444444444"
 
@@ -131,9 +120,6 @@ else
     fail "COMPENSATION LEAK: Stock mismatch ($STOCK_BEFORE before vs $STOCK_AFTER after)!"
 fi
 
-# ------------------------------------------------------------------------------
-# SCENARIO 3: Validation Boundary Injection (HTTP 400)
-# ------------------------------------------------------------------------------
 header "CHAOS SCENARIO 3: VALIDATION BOUNDARY FAULT INJECTION"
 info "Submitting order with invalid payload (negative quantity & zero price)..."
 

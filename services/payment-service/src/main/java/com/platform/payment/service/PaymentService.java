@@ -33,14 +33,12 @@ public class PaymentService {
         UUID orderId = event.getOrderId();
         log.info("Processing payment for orderId: {}, amount: {} {}", orderId, event.getTotalAmount(), event.getCurrency());
 
-        // Check if payment was already recorded
         Optional<Payment> existingPayment = paymentRepository.findByOrderId(orderId);
         if (existingPayment.isPresent()) {
             log.warn("Payment record already exists for orderId: {}. Status: {}", orderId, existingPayment.get().getStatus());
             return existingPayment.get();
         }
 
-        // Execute payment through processor simulator
         PaymentProcessorSimulator.ProcessingResult result = paymentSimulator.process(
                 event.getTotalAmount(),
                 event.getCurrency(),
