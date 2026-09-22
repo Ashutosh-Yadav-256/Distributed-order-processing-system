@@ -33,6 +33,7 @@
         <jacoco.version>0.8.12</jacoco.version>
         <spotbugs.version>4.8.6.2</spotbugs.version>
         <checkstyle.version>3.4.0</checkstyle.version>
+        <pact.version>4.6.14</pact.version>
     </properties>
 
 
@@ -136,6 +137,20 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+
+            <!-- Pact Contract Testing -->
+            <dependency>
+                <groupId>au.com.dius.pact.consumer</groupId>
+                <artifactId>junit5</artifactId>
+                <version>${pact.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>au.com.dius.pact.provider</groupId>
+                <artifactId>junit5spring</artifactId>
+                <version>${pact.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

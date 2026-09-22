@@ -14,6 +14,10 @@
 [![ADRs](https://img.shields.io/badge/ADRs-6%20Documented-blueviolet.svg?style=flat-square)](docs/adr/README.md)
 [![AWS EC2](https://img.shields.io/badge/AWS-Free%20Tier%20EC2-FF9900.svg?style=flat-square&logo=amazonaws)](docs/aws-free-tier-deployment.md)
 [![License](https://img.shields.io/badge/License-MIT-gray.svg?style=flat-square)](LICENSE)
+[![Pact Contract Testing](https://img.shields.io/badge/Pact-Verified%20Contracts-16a085.svg?style=flat-square&logo=pact)](services/order-service/src/test/java/com/platform/order/contract/PaymentConsumerPactTest.java)
+[![Jenkins CI/CD](https://img.shields.io/badge/Jenkins-Declarative%20Pipeline-D33833.svg?style=flat-square&logo=jenkins)](Jenkinsfile)
+[![GitLab CI](https://img.shields.io/badge/GitLab%20CI-Multi--Stage-FC6D26.svg?style=flat-square&logo=gitlab)](.gitlab-ci.yml)
+
 
 A production-grade, event-driven distributed microservices platform engineered for high-throughput, high-concurrency order workflows. The system demonstrates enterprise distributed systems design patterns: **Choreography-based Saga transactions**, **PostgreSQL database-per-service logical isolation**, **atomic concurrency controls preventing inventory overselling**, **automatic compensating rollbacks**, **idempotent message deduplication**, **RabbitMQ dead letter retry pipelines**, **Redis read-through hot caching (15x speedup)**, **Resilience4j fault isolation**, **Spring Cloud Gateway with token-bucket rate limiting**, **native Model Context Protocol (MCP) AI integration**, and **automated AWS Free-Tier EC2 deployment**.
 
@@ -302,6 +306,41 @@ All integration tests utilize Spring MockMvc and in-memory H2 in strict PostgreS
 ./mvnw clean verify
 ./mvnw spotbugs:check checkstyle:check
 ```
+
+### 4. Consumer-Driven Contract Testing (Pact JVM)
+To eliminate brittle inter-service integration tests and prevent breaking API schema changes across distributed teams, the platform implements **Consumer-Driven Contract Testing** using [Pact JVM](https://docs.pact.io) (v4.6.14) with JUnit 5:
+* **Consumer Contract ([`PaymentConsumerPactTest.java`](services/order-service/src/test/java/com/platform/order/contract/PaymentConsumerPactTest.java))**:
+  - `order-service` acts as the consumer of `payment-service` REST endpoints (`GET /api/v1/payments/order/{orderId}`).
+  - Formulates consumer expectations and data schemas using Pact DSL.
+  - Automatically outputs contract specifications to [`target/pacts/order-service-payment-service.json`](services/order-service/target/pacts/order-service-payment-service.json).
+* **Provider Verification ([`PaymentProviderPactTest.java`](services/payment-service/src/test/java/com/platform/payment/contract/PaymentProviderPactTest.java))**:
+  - `payment-service` starts a live test server on a dynamic port (`@SpringBootTest(webEnvironment = RANDOM_PORT)`).
+  - Verifies its actual Spring controller implementations against the consumer's pact specifications using `@Provider("payment-service")` and state handlers (`@State("a payment exists for order")`).
+  - Guarantees backward compatibility without needing end-to-end deployed environments.
+
+```bash
+# Generate consumer contract:
+./mvnw test -pl services/order-service -Dtest=PaymentConsumerPactTest
+
+# Verify provider compliance:
+./mvnw test -pl services/payment-service -Dtest=PaymentProviderPactTest
+```
+
+### 5. Enterprise Jenkins Pipeline ([`Jenkinsfile`](Jenkinsfile))
+A production-grade declarative Jenkins pipeline orchestrating continuous delivery:
+* **Stages**:
+  1. **Initialize & Pre-flight**: Verifies JDK 17 and Maven 3.9 runtime tool installations.
+  2. **Compile & Lint**: Compiles multi-module architecture with SpotBugs and Checkstyle hygiene gates.
+  3. **Unit & Integration Tests**: Executes multi-service test suites with JUnit and JaCoCo coverage report generation.
+  4. **Pact Contract Testing**: Generates consumer contracts in `order-service`, archives pact JSON artifacts, and verifies provider conformance in `payment-service`.
+  5. **Container Image Build**: Parallel Docker container image builds for all 5 services (`api-gateway`, `order-service`, `inventory-service`, `payment-service`, `notification-service`).
+  6. **Health Check Smoke Test**: Verifies gateway endpoint health before deployment.
+
+### 6. GitLab CI Pipeline ([`.gitlab-ci.yml`](.gitlab-ci.yml))
+A parallel multi-cloud pipeline supporting GitLab CI with Maven local repository caching:
+* Multi-stage lifecycle: `build` -> `test` -> `contract-test` -> `package`.
+* Automated JUnit test report integration (`TEST-*.xml`) and artifact expiration policies.
+
 
 ---
 

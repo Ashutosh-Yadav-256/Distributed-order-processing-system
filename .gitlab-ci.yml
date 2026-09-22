@@ -1,0 +1,61 @@
+image: eclipse-temurin:17-jdk-jammy
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+cache:
+  paths:
+    - .m2/repository/
+    - "**/target/"
+
+stages:
+  - build
+  - test
+  - contract-test
+  - package
+
+compile:
+  stage: build
+  script:
+    - ./mvnw clean compile -DskipTests
+
+unit_and_saga_tests:
+  stage: test
+  script:
+    - ./mvnw test -Dtest="!*PactTest*"
+  artifacts:
+    when: always
+    reports:
+      junit: "**/target/surefire-reports/TEST-*.xml"
+    paths:
+      - "**/target/surefire-reports/"
+
+pact_consumer_contract_generation:
+  stage: contract-test
+  script:
+    - ./mvnw test -pl services/order-service -Dtest=PaymentConsumerPactTest
+  artifacts:
+    name: "pact-contracts-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - "services/order-service/target/pacts/*.json"
+    expire_in: 1 week
+
+pact_provider_contract_verification:
+  stage: contract-test
+  needs: ["pact_consumer_contract_generation"]
+  script:
+    - ./mvnw test -pl services/payment-service -Dtest=PaymentProviderPactTest
+
+docker_build:
+  stage: package
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  only:
+    - main
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/order-service:$CI_COMMIT_SHA -f services/order-service/Dockerfile services/order-service
+    - docker build -t $CI_REGISTRY_IMAGE/payment-service:$CI_COMMIT_SHA -f services/payment-service/Dockerfile services/payment-service
+    - docker build -t $CI_REGISTRY_IMAGE/inventory-service:$CI_COMMIT_SHA -f services/inventory-service/Dockerfile services/inventory-service
