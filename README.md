@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/images/banner.jpg" alt="Distributed Order Processing System Banner" width="100%" />
+</p>
+
 # Distributed Order Processing System
 
 [ English ] · [ [Español](docs/i18n/README_es.md) ] · [ [简体中文](docs/i18n/README_zh.md) ] · [ [Deutsch](docs/i18n/README_de.md) ] · [ [日本語](docs/i18n/README_ja.md) ]
